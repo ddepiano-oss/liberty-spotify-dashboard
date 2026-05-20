@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NY Liberty × Spotify · Partnership Dashboard 2026</title>
+<style>
+/* ── RESET & BASE ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: #0A0A0A;
+  color: #E8E4DC;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+button, input { font-family: inherit; cursor: pointer; }
+input { cursor: text; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #111; }
+::-webkit-scrollbar-thumb { background: #2A2A2A; border-radius: 4px; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp   { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+@keyframes spin     { to   { transform: rotate(360deg); } }
+@keyframes pulse    { 0%,100% { opacity:1; } 50% { opacity:.4; } }
+.fade-up  { animation: fadeUp .2s ease forwards; }
+.spinning { display:inline-block; animation: spin .9s linear infinite; }
+
+/* ── LAYOUT ── */
+#header {
+  background: #0D0D0D;
+  border-bottom: 1px solid #1A1A1A;
+  position: sticky; top: 0; z-index: 100;
+}
+.header-inner {
+  max-width: 980px; margin: 0 auto; padding: 0 20px;
+}
+.header-top {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px; gap: 12px;
+}
+.logo-wrap { display:flex; align-items:center; gap:12px; }
+.logo-icon {
+  width:36px; height:36px; border-radius:9px;
+  background: linear-gradient(135deg,#1DB954,#0d6b2e);
+  display:flex; align-items:center; justify-content:center;
+  font-size:17px; flex-shrink:0;
+}
+.logo-title  { font-size:14px; font-weight:700; color:#F0EDE6; letter-spacing:-.01em; }
+.logo-sub    { font-size:11px; color:#374151; margin-top:1px; }
+.header-meta { display:flex; gap:8px; align-items:center; flex-shrink:0; }
+.live-dot    { display:inline-block; width:7px; height:7px; border-radius:50%; background:#1DB954; animation:pulse 2s infinite; flex-shrink:0; }
+.meta-pill   { font-size:11px; color:#374151; }
+.api-ok      { font-size:10px; color:#1DB954; background:rgba(29,185,84,.1); border:1px solid rgba(29,185,84,.2); border-radius:20px; padding:2px 9px; display:none; }
+
+/* ── TAB NAV ── */
+.tab-nav     { display:flex; overflow-x:auto; scrollbar-width:none; -ms-overflow-style:none; }
+.tab-nav::-webkit-scrollbar { display:none; }
+.tab-btn {
+  padding:9px 15px; border:none; background:transparent;
+  color:#4B5563; font-size:13px; font-weight:500; white-space:nowrap;
+  border-bottom:2px solid transparent; transition:color .15s, border-color .15s;
+}
+.tab-btn.active { color:#F0EDE6; border-bottom-color:#1DB954; }
+.tab-btn:hover:not(.active) { color:#9CA3AF; }
+
+/* ── BODY ── */
+#body { max-width:980px; margin:0 auto; padding:26px 20px 60px; }
+.panel { display:none; }
+.panel.active { display:block; }
+
+/* ── TYPOGRAPHY ── */
+.page-title { font-size:19px; font-weight:700; color:#F0EDE6; letter-spacing:-.02em; }
+.page-sub   { font-size:13px; color:#4B5563; margin-top:3px; }
+.sec-label  { font-size:11px; font-weight:700; color:#2A2A2A; text-transform:uppercase; letter-spacing:.08em; margin-bottom:11px; }
+
+/* ── PAGE HEADER ROW ── */
+.panel-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+
+/* ── REFRESH BUTTON ── */
+.refresh-btn {
+  display:flex; align-items:center; gap:7px;
+  padding:8px 18px; border-radius:8px;
+  border:1px solid rgba(29,185,84,.3);
+  background:rgba(29,185,84,.07);
+  color:#1DB954; font-size:13px; font-weight:600;
+  transition:background .15s;
+}
+.refresh-btn:hover  { background:rgba(29,185,84,.13); }
+.refresh-btn:disabled { color:#374151; border-color:#222; background:#0A0A0A; cursor:not-allowed; }
+.refresh-icon { font-size:15px; }
+
+/* ── STAT CARDS ── */
+.stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-bottom:20px; }
+.stat-card { background:#111; border:1px solid #1A1A1A; border-radius:10px; padding:13px 15px; }
+.stat-val   { font-size:22px; font-weight:700; letter-spacing:-.02em; }
+.stat-label { font-size:11px; color:#4B5563; margin-top:4px; }
+
+/* ── INTEL CARDS ── */
+.intel-list { display:flex; flex-direction:column; gap:7px; }
+.intel-card {
+  background:#111; border:1px solid #1A1A1A;
+  border-radius:10px; padding:13px 16px;
+  animation: fadeUp .2s ease forwards;
+}
+.intel-top  { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+.intel-body { flex:1; min-width:0; }
+.intel-tags { display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-bottom:6px; }
+.intel-icon { font-size:14px; }
+.intel-headline { font-size:14px; font-weight:600; color:#F0EDE6; }
+.intel-detail   { font-size:13px; color:#9CA3AF; line-height:1.65; margin-bottom:9px; }
+.intel-action   {
+  background:rgba(29,185,84,.06); border:1px solid rgba(29,185,84,.15);
+  border-radius:8px; padding:8px 12px;
+  display:flex; gap:8px; align-items:flex-start;
+}
+.action-label { font-size:11px; color:#1DB954; font-weight:700; white-space:nowrap; padding-top:1px; flex-shrink:0; }
+.action-text  { font-size:13px; color:#A7F3C2; line-height:1.5; }
+.intel-age    { font-size:11px; color:#2A2A2A; white-space:nowrap; flex-shrink:0; margin-top:2px; }
+
+/* ── BADGES / PILLS ── */
+.badge, .pill {
+  display:inline-block; font-size:10px; font-weight:700;
+  border-radius:20px; padding:2px 8px; white-space:nowrap;
+}
+.tbc-pill { font-size:10px; font-weight:600; color:#FBBF24; background:rgba(251,191,36,.1); border:1px solid rgba(251,191,36,.2); border-radius:20px; padding:1px 7px; }
+
+/* ── FILTER PILLS ── */
+.filter-row { display:flex; gap:7px; flex-wrap:wrap; margin-bottom:18px; }
+.filter-btn {
+  padding:5px 14px; border-radius:20px; border:1px solid #222;
+  background:transparent; color:#4B5563; font-size:12px; font-weight:600;
+  transition:all .12s;
+}
+.filter-btn.active { border-color:var(--fc); background:var(--fbg); color:var(--fc); }
+
+/* ── QUARTER PILLS ── */
+.q-row  { display:flex; gap:8px; margin-bottom:18px; }
+.q-btn  {
+  padding:6px 18px; border-radius:20px; border:1px solid #222;
+  background:transparent; color:#4B5563; font-size:13px; font-weight:600;
+  transition:all .12s;
+}
+.q-btn.active { border-color:#1DB954; background:rgba(29,185,84,.08); color:#1DB954; }
+
+/* ── CAMPAIGN CARDS ── */
+.camp-list { display:flex; flex-direction:column; gap:6px; }
+.camp-card {
+  background:#111; border:1px solid #1A1A1A; border-radius:10px;
+  padding:12px 15px; cursor:pointer; transition:border-color .12s;
+  border-left:3px solid var(--lc);
+}
+.camp-card:hover { border-color:#252525; }
+.camp-head { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.camp-title-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.camp-name  { font-size:13px; font-weight:600; color:#F0EDE6; }
+.camp-dates { font-size:12px; color:#374151; margin-top:3px; }
+.camp-toggle { font-size:17px; color:#2A2A2A; user-select:none; flex-shrink:0; }
+.camp-body  { margin-top:11px; padding-top:11px; border-top:1px solid #1A1A1A; }
+.angle-box {
+  background:rgba(29,185,84,.06); border:1px solid rgba(29,185,84,.15);
+  border-radius:8px; padding:9px 12px; margin-bottom:8px;
+}
+.angle-label { font-size:10px; color:#1DB954; font-weight:700; text-transform:uppercase; letter-spacing:.07em; margin-bottom:4px; }
+.angle-text  { font-size:13px; color:#A7F3C2; line-height:1.6; }
+.warn-box {
+  background:rgba(248,113,113,.06); border:1px solid rgba(248,113,113,.2);
+  border-radius:8px; padding:9px 12px;
+}
+.warn-label { font-size:10px; color:#F87171; font-weight:700; text-transform:uppercase; letter-spacing:.07em; margin-bottom:4px; }
+.warn-text  { font-size:13px; color:#FCA5A5; line-height:1.6; }
+.camp-none  { font-size:13px; color:#2A2A2A; }
+
+/* ── UPDATES BANNER ── */
+.updates-banner {
+  background:rgba(29,185,84,.05); border:1px solid rgba(29,185,84,.15);
+  border-radius:10px; padding:13px 16px; margin-bottom:20px;
+}
+.updates-label { font-size:10px; color:#1DB954; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-bottom:9px; }
+.update-row { display:flex; gap:10px; font-size:13px; margin-bottom:6px; }
+.update-row:last-child { margin-bottom:0; }
+.update-type { font-weight:600; min-width:70px; flex-shrink:0; }
+.update-text { color:#9CA3AF; }
+.update-camp { color:#D1CAC0; }
+
+/* ── PAIRING CARDS ── */
+.pair-card {
+  background:#111; border:1px solid #1A1A1A; border-radius:10px;
+  padding:12px 15px; cursor:pointer; margin-bottom:6px;
+  border-left:3px solid var(--lc);
+}
+.pair-head  { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.pair-title-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.pair-name  { font-size:13px; font-weight:600; color:#F0EDE6; }
+.pair-dates { font-size:12px; color:#374151; }
+.pair-body  { margin-top:11px; padding-top:11px; border-top:1px solid #1A1A1A; }
+.pair-desc  { font-size:13px; color:#9CA3AF; line-height:1.65; margin-bottom:11px; }
+.pair-actions { display:flex; flex-direction:column; gap:5px; }
+.pair-action { display:flex; gap:8px; font-size:13px; }
+.pair-arrow { flex-shrink:0; }
+.pair-act-text { color:#C9C3B8; }
+
+/* ── PLAYER / RIVALRY CARDS ── */
+.player-card {
+  background:#111; border:1px solid #1A1A1A; border-radius:10px;
+  padding:12px 15px; display:flex; gap:13px; align-items:flex-start;
+  margin-bottom:6px;
+}
+.pos-badge {
+  width:38px; height:38px; border-radius:8px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:700;
+}
+.pos-active  { background:rgba(29,185,84,.1); border:1px solid rgba(29,185,84,.25); color:#1DB954; }
+.pos-monitor { background:rgba(251,191,36,.1); border:1px solid rgba(251,191,36,.25); color:#FBBF24; }
+.player-name { font-size:14px; font-weight:600; color:#F0EDE6; }
+.player-tags { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:4px; }
+.player-note { font-size:12px; color:#4B5563; line-height:1.5; }
+.status-active  { font-size:11px; color:#1DB954; }
+.status-monitor { font-size:11px; color:#FBBF24; }
+.stars { font-size:12px; color:#FBBF24; }
+
+.rivalry-card {
+  background:#111; border:1px solid #1A1A1A; border-radius:10px;
+  padding:12px 15px; display:flex; gap:13px; align-items:flex-start;
+  margin-bottom:6px; border-left:3px solid var(--rc);
+}
+.riv-dots { display:flex; flex-direction:column; gap:3px; flex-shrink:0; padding-top:4px; }
+.riv-dot  { width:5px; height:5px; border-radius:1px; }
+.riv-dot.on  { background:var(--rc); }
+.riv-dot.off { background:#1F2937; }
+.riv-name { font-size:14px; font-weight:600; color:#F0EDE6; }
+.riv-tags { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:4px; }
+.riv-note { font-size:12px; color:#4B5563; line-height:1.5; }
+
+/* ── LEGEND ROW ── */
+.legend-row { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:18px; }
+.legend-item { display:flex; align-items:center; gap:6px; font-size:12px; color:#4B5563; }
+.legend-dot  { width:9px; height:9px; border-radius:2px; flex-shrink:0; }
+
+/* ── MODAL ── */
+#modal-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.82);
+  z-index:200; display:none; align-items:center; justify-content:center; padding:20px;
+}
+#modal-overlay.open { display:flex; }
+.modal-box {
+  background:#141414; border:1px solid #2A2A2A; border-radius:14px;
+  padding:28px; max-width:460px; width:100%;
+  animation: fadeUp .2s ease forwards;
+}
+.modal-title { font-size:16px; font-weight:700; color:#F0EDE6; margin-bottom:8px; }
+.modal-body  { font-size:13px; color:#6B7280; line-height:1.6; margin-bottom:20px; }
+.modal-input {
+  width:100%; background:#0A0A0A; border:1px solid #2A2A2A; border-radius:8px;
+  padding:10px 14px; color:#F0EDE6; font-size:14px; margin-bottom:16px; outline:none;
+  transition:border-color .12s;
+}
+.modal-input:focus { border-color:#1DB954; }
+.modal-btns { display:flex; gap:10px; justify-content:flex-end; }
+.btn-cancel { padding:8px 16px; border-radius:8px; border:1px solid #2A2A2A; background:transparent; color:#6B7280; font-size:13px; }
+.btn-save   { padding:8px 18px; border-radius:8px; border:none; background:#1DB954; color:#000; font-size:13px; font-weight:700; }
+
+/* ── FOOTER ── */
+#footer { border-top:1px solid #111; padding:14px 20px; text-align:center; }
+#footer p { font-size:11px; color:#1A1A1A; }
+
+/* ── EMPTY STATE ── */
+.empty-state { text-align:center; padding:40px 0; color:#2A2A2A; font-size:13px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="header">
+  <div class="header-inner">
+    <div class="header-top">
+      <div class="logo-wrap">
+        <div class="logo-icon">🎵</div>
+        <div>
+          <div class="logo-title">NY Liberty × Spotify</div>
+          <div class="logo-sub">Partnership Dashboard · 2026 WNBA Season</div>
+        </div>
+      </div>
+      <div class="header-meta">
+        <span class="live-dot"></span>
+        <span class="meta-pill">Cal: <span id="cal-date">May 20, 2026</span></span>
+        <span class="api-ok" id="api-ok-badge">API ✓</span>
+      </div>
+    </div>
+    <nav class="tab-nav" id="tab-nav">
+      <button class="tab-btn active" data-tab="liberty">🏀 Liberty Intel</button>
+      <button class="tab-btn" data-tab="wnba">🏆 WNBA Landscape</button>
+      <button class="tab-btn" data-tab="calendar">📅 Calendar</button>
+      <button class="tab-btn" data-tab="pairings">⚡ Pairings</button>
+      <button class="tab-btn" data-tab="roster">👤 Roster</button>
+    </nav>
+  </div>
+</div>
+
+<!-- BODY -->
+<div id="body">
+
+  <!-- ═══ LIBERTY INTEL ═══ -->
+  <div class="panel active" id="panel-liberty">
+    <div class="panel-head">
+      <div>
+        <div class="page-title">NY Liberty Live Intel</div>
+        <div class="page-sub">Injuries, matchups, cultural moments &amp; Spotify action items · refresh weekly</div>
+      </div>
+      <button class="refresh-btn" id="btn-refresh-lib">
+        <span class="refresh-icon">↻</span> Refresh Intel
+      </button>
+    </div>
+    <div class="intel-list" id="lib-list"></div>
+  </div>
+
+  <!-- ═══ WNBA LANDSCAPE ═══ -->
+  <div class="panel" id="panel-wnba">
+    <div class="panel-head">
+      <div>
+        <div class="page-title">WNBA Landscape</div>
+        <div class="page-sub">League-wide ratings, white space, influencers &amp; strategic context for Spotify</div>
+      </div>
+      <button class="refresh-btn" id="btn-refresh-wnba">
+        <span class="refresh-icon">↻</span> Refresh WNBA Intel
+      </button>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-val" style="color:#1DB954">+34%</div><div class="stat-label">Viewership YoY</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:#60A5FA">~2.5M</div><div class="stat-label">Peak 2026 viewers</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:#A78BFA">18–34</div><div class="stat-label">Core demo</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:#F87171">0</div><div class="stat-label">Audio brand owners</div></div>
+    </div>
+    <div class="filter-row" id="wnba-filters">
+      <button class="filter-btn active" data-cat="all" style="--fc:#6B7280;--fbg:rgba(107,114,128,.1)">All</button>
+      <button class="filter-btn" data-cat="ratings"    style="--fc:#60A5FA;--fbg:rgba(96,165,250,.1)">📊 Ratings</button>
+      <button class="filter-btn" data-cat="whitespace" style="--fc:#1DB954;--fbg:rgba(29,185,84,.1)">🎯 White Space</button>
+      <button class="filter-btn" data-cat="player"     style="--fc:#FBBF24;--fbg:rgba(251,191,36,.1)">⭐ Players</button>
+      <button class="filter-btn" data-cat="influencer" style="--fc:#A78BFA;--fbg:rgba(167,139,250,.1)">📣 Influencers</button>
+      <button class="filter-btn" data-cat="media"      style="--fc:#FB923C;--fbg:rgba(251,146,60,.1)">📺 Media</button>
+    </div>
+    <div class="intel-list" id="wnba-list"></div>
+  </div>
+
+  <!-- ═══ CALENDAR ═══ -->
+  <div class="panel" id="panel-calendar">
+    <div class="panel-head">
+      <div>
+        <div class="page-title">Spotify 2026 Campaign Calendar</div>
+        <div class="page-sub">Q2–Q4 only · Q1 complete · slides 9–11 · refreshes weekly</div>
+      </div>
+      <button class="refresh-btn" id="btn-refresh-cal">
+        <span class="refresh-icon">↻</span> Refresh Calendar
+      </button>
+    </div>
+    <div class="updates-banner" id="cal-updates-banner">
+      <div class="updates-label">Latest updates</div>
+      <div id="cal-updates-list"></div>
+    </div>
+    <div class="q-row">
+      <button class="q-btn active" data-q="Q2">Q2 <span style="font-weight:400;font-size:12px;opacity:.7">Apr–Jun</span></button>
+      <button class="q-btn" data-q="Q3">Q3 <span style="font-weight:400;font-size:12px;opacity:.7">Jul–Sep</span></button>
+      <button class="q-btn" data-q="Q4">Q4 <span style="font-weight:400;font-size:12px;opacity:.7">Oct–Dec</span></button>
+    </div>
+    <div class="camp-list" id="camp-list"></div>
+  </div>
+
+  <!-- ═══ PAIRINGS ═══ -->
+  <div class="panel" id="panel-pairings">
+    <div class="page-title" style="margin-bottom:5px">Moment Pairings</div>
+    <div class="page-sub" style="margin-bottom:18px">Where Spotify's calendar meets the Liberty season — when to invest, when to hold</div>
+    <div class="legend-row" id="pair-legend"></div>
+    <div id="pair-list"></div>
+  </div>
+
+  <!-- ═══ ROSTER ═══ -->
+  <div class="panel" id="panel-roster">
+    <div class="page-title" style="margin-bottom:5px">Roster &amp; Rivalries</div>
+    <div class="page-sub" style="margin-bottom:22px">Key players and flagged matchups for activation planning</div>
+    <div class="sec-label">Key players</div>
+    <div id="player-list" style="margin-bottom:28px"></div>
+    <div class="sec-label">Flagged rivalries</div>
+    <div id="rivalry-list"></div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div id="footer"><p>NY Liberty × Spotify · Partnership Intelligence · Internal use only · Refresh weekly</p></div>
+
+<!-- API KEY MODAL -->
+<div id="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title">Enter Anthropic API Key</div>
+    <div class="modal-body">To regenerate live intel, provide your Anthropic API key. It stays in this browser session only and is never stored or sent anywhere except api.anthropic.com.</div>
+    <input type="password" class="modal-input" id="api-key-input" placeholder="sk-ant-…" />
+    <div class="modal-btns">
+      <button class="btn-cancel" id="modal-cancel">Cancel</button>
+      <button class="btn-save"   id="modal-save">Save &amp; Refresh</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════
+   DATA
+════════════════════════════════════════════════════════ */
+const STATIC_LIBERTY = [
+  { id:"l1", category:"game",     daysAgo:0, impact:"high",   headline:"Liberty open 2026 season 3-1 after home win over Storm",           detail:"NY Liberty started the 2026 WNBA season with three straight wins before a road loss in Chicago. Breanna Stewart is averaging 26.4 pts through four games, drawing sustained national coverage. The home opener at Barclays Center sold out.",                                                                                                    spotifyAction:"Opening week activation is live — drop the Liberty × Spotify co-branded playlist now. Stewart's hot start is a content hook for social." },
+  { id:"l2", category:"rivalry",  daysAgo:1, impact:"high",   headline:"Liberty vs. Aces rematch confirmed May 31 in Las Vegas",           detail:"The marquee rivalry matchup of the WNBA calendar is set for May 31. A'ja Wilson vs. Breanna Stewart will be the national broadcast game on ESPN. Both teams are undefeated or near-undefeated entering the game.",                                                                                                                      spotifyAction:"Max activation window — dual-market push NY + LV, head-to-head playlist battle mechanic, paid media boost in both DMAs day-of and day-before." },
+  { id:"l3", category:"cultural", daysAgo:2, impact:"high",   headline:"Ionescu mentions Spotify playlists in major podcast appearance",    detail:"Ionescu appeared on a top sports/culture podcast this week and called out her Spotify pre-game playlist routine. The clip is circulating strongly on social with high Gen Z engagement.",                                                                                                                                                    spotifyAction:"Amplify organically — share the clip via Spotify social, reach out to Ionescu's team about co-creating an official pre-game playlist series. This is a warm inbound lead." },
+  { id:"l4", category:"injury",   daysAgo:2, impact:"medium", headline:"Betnijah Laney-Hamilton listed day-to-day with ankle soreness",     detail:"BLH sat out of Tuesday's practice with a mild ankle issue. Listed as day-to-day, not expected to miss extended time. Her injury history across prior seasons makes this worth close monitoring.",                                                                                                                                  spotifyAction:"Hold any BLH-specific content in production until she clears. If she misses 2+ games, pivot featured player content to Jonquel Jones." },
+  { id:"l5", category:"cultural", daysAgo:4, impact:"high",   headline:"Liberty Pride Night date confirmed — major activation window",      detail:"The Liberty have confirmed their annual Pride Night game. It's consistently one of the highest-attended home games and generates outsized social engagement. WNBA audiences over-index strongly for LGBTQ+ fandom.",                                                                                                                  spotifyAction:"LGBTQ+ artist spotlight playlist tied to Liberty Pride Night. Partner with queer artists with genuine WNBA connections — authentic, not performative. High earned media potential." },
+  { id:"l6", category:"rivalry",  daysAgo:5, impact:"high",   headline:"Clark–Ionescu matchup confirmed for June 14 on ESPN",              detail:"Liberty vs. Indiana Fever on June 14 will feature the Clark vs. Ionescu storyline that dominated WNBA coverage in 2025. ESPN has flagged it as a priority broadcast with a wide audience expected.",                                                                                                                                          spotifyAction:"Gen Z crossover moment. Dual-player playlist drop (Ionescu's picks vs. Clark-inspired curation), paid social targeting 18–28 in NY and Indianapolis. Start building assets now." },
+  { id:"l7", category:"roster",   daysAgo:3, impact:"medium", headline:"Nyara Sabally clears full practice, return timeline set",          detail:"Sabally completed her first full-contact practice this week. Medical staff are optimistic about a return within the first two weeks. Her return strengthens the Liberty frontcourt rotation significantly.",                                                                                                                                spotifyAction:"Sabally sisters storyline (Nyara in NY, Satou in Dallas) activatable once she's cleared. Watch for their first head-to-head matchup — strong editorial content angle." },
+  { id:"l8", category:"media",    daysAgo:3, impact:"high",   headline:"Liberty games averaging top-5 WNBA viewership through first month", detail:"Early 2026 ratings show Liberty games consistently in the top 5 most-watched matchups league-wide. The combination of Stewart's performance, Ionescu's cultural crossover, and strong NY market lift is compounding.",                                                                                                                  spotifyAction:"The Liberty partnership investment thesis is validated. Use this data internally to defend ring-fenced activation budget against Project Horizon compression." },
+];
+
+const STATIC_WNBA = [
+  { id:"w1", category:"ratings",    daysAgo:1, impact:"high",   headline:"WNBA 2026 viewership up 34% vs. same point in 2025",                   detail:"Early 2026 WNBA ratings are tracking 34% above the same window last season across ESPN, TNT, and Prime Video. The league's new media deal is distributing games to wider audiences, and the Clark effect continues to lift the entire league.",                                                       spotifyAction:"The broader WNBA investment thesis is holding. Share this data point with Spotify leadership to reinforce the partnership value and protect Liberty activation budget from Project Horizon compression." },
+  { id:"w2", category:"player",     daysAgo:1, impact:"high",   headline:"Caitlin Clark named early season MVP frontrunner",                      detail:"Clark is averaging 28+ points and 9 assists, drawing comparisons to league greats. She's the single most searched WNBA player and drives outsized streaming and social engagement on every platform.",                                                                                              spotifyAction:"Clark elevates every Liberty-Fever matchup into a tentpole. Consider a league-wide WNBA playlist series including Clark alongside Ionescu — broader than just the Liberty partnership." },
+  { id:"w3", category:"whitespace", daysAgo:2, impact:"high",   headline:"Audio remains the WNBA's only unclaimed major brand territory",         detail:"Every major WNBA sponsor in 2026 is visual-first — broadcast, apparel, digital video. No brand has established a meaningful audio or music identity around the league. Spotify is uniquely positioned to own this lane entirely as first mover.",                                                         spotifyAction:"Pitch a league-wide audio identity to WNBA HQ — not just Liberty-specific. Official league playlist partner, player sound profiles, game-day audio moments. First mover advantage is available right now." },
+  { id:"w4", category:"influencer", daysAgo:3, impact:"medium", headline:"Angel Reese's social following crosses 12M across platforms",           detail:"Angel Reese (Chicago Sky) continues to grow the fastest of any WNBA player on social, with a fashion-and-culture crossover that extends well beyond basketball. She's generating content volumes closer to NFL players than typical WNBA athletes.",                                       spotifyAction:"Reese isn't a Liberty player but shapes the WNBA cultural narrative. A league-wide playlist or podcast featuring Reese alongside Ionescu and Stewart would extend Spotify's reach beyond Liberty-only fandom." },
+  { id:"w5", category:"media",      daysAgo:3, impact:"high",   headline:"TNT and Prime Video driving new WNBA fan acquisition at scale",         detail:"The 2026 media deal has brought WNBA games to TNT and Prime Video for the first time at scale. Early data shows these broadcasts converting non-traditional sports viewers — younger, more female, more diverse than legacy sports audiences.",                                                    spotifyAction:"These are Spotify's users. Target WNBA game-broadcast audiences with Spotify in-app editorial and contextual ads during and after games on TNT and Prime Video." },
+  { id:"w6", category:"whitespace", daysAgo:4, impact:"medium", headline:"WNBA podcast landscape is dramatically underserved in 2026",            detail:"Despite the league's growth, there is no dominant, widely-distributed WNBA podcast on any platform. Player storytelling, game analysis, and culture content are fragmented across small independent shows with limited reach.",                                                                spotifyAction:"Spotify Originals opportunity. A flagship WNBA podcast — player-hosted or alongside a credible voice like Chiney Ogwumike — would be category-defining. Liberty players as featured guests tie back to the partnership." },
+  { id:"w7", category:"player",     daysAgo:4, impact:"medium", headline:"A'ja Wilson signs major crossover brand deals ahead of season",         detail:"Wilson has announced several high-profile brand partnerships this offseason, cementing her status as the league's most commercially active player outside of Clark. Her cultural reach extends well beyond basketball.",                                                                              spotifyAction:"Wilson's Liberty-rival status doesn't preclude a Spotify league relationship. She's essential to any WNBA-wide audio play — her absence from league content would be noticed by the fanbase." },
+  { id:"w8", category:"ratings",    daysAgo:5, impact:"medium", headline:"WNBA merchandise up 80% YoY, driven by under-25 buyers",               detail:"WNBA licensed merchandise is up 80% through the first month of the 2026 season, driven by under-25 buyers. Players like Clark, Ionescu, Reese, and Wilson are selling jersey volumes that rival mid-tier NBA players.",                                                                          spotifyAction:"Gen Z WNBA fans are Spotify's core demographic. A merchandise + music cross-promotion — Spotify-exclusive content with Liberty ticket purchase — could drive meaningful Premium conversion in this cohort." },
+];
+
+const STATIC_CAL_UPDATES = [
+  { campaignId:"Fan Life 3.0",        type:"confirmed", update:"Jul 8 launch date locked. US regional lead confirmed. Begin Liberty placement negotiation with Fan Life team immediately." },
+  { campaignId:"Watching On Spotify", type:"confirmed", update:"Sep 1 launch confirmed for US/UK/CA. WNBA playoff timing is ideal — Liberty playoff content can anchor the launch story." },
+  { campaignId:"MFT+",                type:"note",      update:"H2 timing still TBC — risk flag. If confirmed Aug/Sep, competes with Liberty playoff activation. Escalate for date confirmation ASAP." },
+];
+
+const CAMPAIGNS = [
+  { id:"mixing",           name:"Mixing Tools",                  dates:"Feb 25–Apr 17",   q:"Q2", status:"active",    level:"medium",   angle:"Rivalry playlist battles — Liberty fans vs. rival fans",                                                                    conflict:null },
+  { id:"prompted",         name:"Prompted Playlists",            dates:"Apr 27–Jun 18",   q:"Q2", status:"active",    level:"high",     angle:'"Describe your pregame vibe" — in-product Liberty game-day hook tied to match schedule',                                     conflict:null },
+  { id:"fitness",          name:"Fitness / Peloton",             dates:"Apr 27–Jun 7",    q:"Q2", status:"confirmed", level:"high",     angle:"Stewart & Ionescu pre-game workout playlists — direct Peloton athlete content fit",                                          conflict:null },
+  { id:"abpvip",           name:"ABP VIP 2.0 (US only)",         dates:"Apr 16–May 9",    q:"Q2", status:"confirmed", level:"medium",   angle:"Liberty VIP ticket + Spotify Premium upgrade cross-sell at season opener",                                                  conflict:null },
+  { id:"vfy",              name:"VFY",                           dates:"Apr 27",           q:"Q2", status:"confirmed", level:"low",      angle:null, conflict:null },
+  { id:"songdna",          name:"Song DNA",                      dates:"Apr 13",           q:"Q2", status:"confirmed", level:"medium",   angle:"Player sound DNA profiles — Sabrina vs. Stewie musical identity as shareable content",                                       conflict:null },
+  { id:"music_creativity", name:"Music Creativity Launch",       dates:"Jun 16",           q:"Q2", status:"confirmed", level:"high",     angle:'"Build your Liberty rivalry playlist" — user-generated fan participation hook at launch',                                    conflict:null },
+  { id:"anniv_film",       name:"20th Anniv × For Good: Film",   dates:"Jun TBC",          q:"Q2", status:"tbc",       level:"medium",   angle:"Women in sport / social justice overlay — WNBA's values align directly with For Good",                                      conflict:null },
+  { id:"fcb_q2",           name:"FCB El Clasico",                dates:"Apr / May",        q:"Q2", status:"confirmed", level:"hold",     angle:null, conflict:"Global tentpole — keep Liberty activations owned-channel-first during FCB window to avoid attention split" },
+  { id:"horizon_q2",       name:"Project Horizon (US only)",     dates:"May 20–Aug 9",     q:"Q2", status:"confirmed", level:"conflict", angle:null, conflict:"Major US product push will compress Liberty paid media budget Jun–Aug. Pre-fund Liberty July activation separately before Horizon locks budgets." },
+  { id:"fanlife",          name:"Fan Life 3.0",                  dates:"Jul 8–Sep 30",     q:"Q3", status:"confirmed", level:"flagship", angle:"FLAGSHIP — Liberty as primary US sport story inside Fan Life. WNBA fandom is the campaign personified. Negotiate placement now.", conflict:null },
+  { id:"watching",         name:"Watching On Spotify",           dates:"Sep 1–Oct 11",     q:"Q3", status:"confirmed", level:"high",     angle:"WNBA playoff highlight clips as Watching On Spotify launch case study — pitch product team now",                             conflict:null },
+  { id:"kallax",           name:"Project Kallax",                dates:"Aug–Sep TBC",      q:"Q3", status:"tbc",       level:"watch",    angle:null, conflict:"Overlaps with playoff push — pre-differentiate messaging so Liberty content isn't lost in Kallax PR noise" },
+  { id:"mft",              name:"MFT+",                          dates:"H2 TBC",           q:"Q3", status:"tbc",       level:"conflict", angle:null, conflict:"UNKNOWN TIMING RISK — if Aug/Sep, competes with playoff activation. Get confirmed dates immediately." },
+  { id:"billions_sep",     name:"Billions Club Live",            dates:"Sep TBC",          q:"Q3", status:"tbc",       level:"low",      angle:null, conflict:null },
+  { id:"singalong",        name:"Sing Along",                    dates:"TBC",              q:"Q3", status:"tbc",       level:"low",      angle:null, conflict:null },
+  { id:"wrapped",          name:"2026 Wrapped",                  dates:"Dec 2 TBC",        q:"Q4", status:"confirmed", level:"high",     angle:'"Sound of the Liberty 2026" — fan listening trends, player playlists, most-streamed game days as Wrapped editorial',          conflict:null },
+  { id:"fcb_q4",           name:"FCB El Clasico",                dates:"Oct / Nov TBC",    q:"Q4", status:"confirmed", level:"hold",     angle:null, conflict:"Global tentpole competing with WNBA post-season. Pre-build all Liberty October content before El Clasico prep begins." },
+  { id:"horizon_q4",       name:"Project Horizon (expansion)",   dates:"H2 TBC",           q:"Q4", status:"tbc",       level:"watch",    angle:null, conflict:null },
+];
+
+const PAIRINGS = [
+  { title:"Fan Life 3.0 × WNBA Playoff Run",            dates:"Jul 8–Sep 30", level:"flagship", desc:"The most powerful alignment in the calendar. Fan Life's premise — deep, obsessive, community-driven fandom — is the WNBA audience exactly. Liberty should be the flagship US sport story inside Fan Life 3.0. This needs to be in the brief now.",                                                                    actions:["Get Liberty written into Fan Life 3.0 brief before campaign locks","Season-long 'sound of the Liberty' editorial content series","Player playlist drops tied to Fan Life publishing cadence","Fan community playlist mechanic — Liberty fans build it together"] },
+  { title:"Fitness / Peloton × Opening Week",            dates:"Apr 27–Jun 7", level:"high",     desc:"Confirmed Peloton partnership gives a ready-made vehicle. Stewart and Ionescu pre-game routines are untapped content that slots directly into Peloton's athlete format at zero marginal cost.",                                                                                                                       actions:["Stewart + Ionescu pre-game playlist content for Peloton","In-app Fitness editorial placement on Liberty home game days","Season opener co-branded content with Peloton × Liberty"] },
+  { title:"Watching On Spotify × WNBA Postseason",       dates:"Sep 1–Oct 11", level:"high",     desc:"Watching On Spotify launches directly into playoff season. WNBA highlight clips and player content are exactly what the feature needs for a launch story. Liberty as the named launch case study.",                                                                                                                   actions:["Pitch Liberty as Watching On Spotify launch partner to product team","Playoff highlight content series exclusive to Spotify","Behind-the-scenes player content as feature showcase"] },
+  { title:"Music Creativity Launch × Rivalry Games",     dates:"Jun 16+",      level:"medium",   desc:"Music Creativity full launch drops mid-June into peak rivalry season. Fan playlist battles are zero-cost, generate user participation, and produce earned social content naturally.",                                                                                                                                 actions:["Head-to-head fan playlist battle for Aces + Fever matchups","Prompted Playlists 'describe your pregame Liberty vibe' hook","Mixing Tools rivalry content on owned social channels"] },
+  { title:"2026 Wrapped × Liberty Season Story",         dates:"Dec 2 TBC",    level:"medium",   desc:"Start building the Liberty Wrapped data story now. Fan listening trends, player playlists, most-streamed game days — compelling Wrapped-adjacent editorial with strong earned media potential.",                                                                                                                     actions:["Track Liberty fan listening patterns from opening night","Collect player playlist data throughout season","'Most-played during a Liberty win' data story for December"] },
+  { title:"Project Horizon US × Peak WNBA Season",       dates:"May 20–Aug 9", level:"conflict", desc:"Horizon is a major US product push that will compress paid media budgets and team bandwidth through the heart of WNBA season. Without pre-planning, Liberty activations will get squeezed.",                                                                                                                         actions:["Pre-fund Liberty Jul–Sep budget separately before Horizon locks","Build mid-summer Liberty content ahead of launch to run automatically","Advocate for ring-fenced Liberty budget in Q2 planning cycle"] },
+  { title:"FCB El Clasico × WNBA Post-Season",           dates:"Oct / Nov TBC",level:"hold",     desc:"El Clasico pulls internal attention from WNBA post-season simultaneously. October Liberty work should be pre-built and owned-channel-first.",                                                                                                                                                                       actions:["Pre-build all October Liberty content before El Clasico prep window","Owned-channel only during FCB overlap — pause paid Liberty spend","No major creative production asks from shared teams in this period"] },
+];
+
+const ROSTER = [
+  { name:"Breanna Stewart",         pos:"F",   status:"active",  note:"Face of franchise. 2× MVP candidate. Maximum activation value — any Stewie game is marquee.", stars:3 },
+  { name:"Sabrina Ionescu",         pos:"G",   status:"active",  note:"Massive Gen Z following. Nike, style culture, crossover appeal. Natural Spotify personality — known music fan.", stars:3 },
+  { name:"Jonquel Jones",           pos:"C/F", status:"active",  note:"2022 WNBA MVP. International background — EU/Caribbean market angle for Spotify global.", stars:2 },
+  { name:"Betnijah Laney-Hamilton", pos:"G",   status:"monitor", note:"Injury history — track in-season availability before finalizing activation plans.", stars:2 },
+  { name:"Nyara Sabally",           pos:"F",   status:"monitor", note:"Injury recovery. Sister of Satou Sabally (Dallas) — international storytelling angle.", stars:1 },
+];
+
+const RIVALRIES = [
+  { opp:"Las Vegas Aces",           level:5, badge:"Primary",  color:"#F87171", note:"Championship rivalry. A'ja Wilson vs. Stewart defines the WNBA era. Dual-market NY + LV playlist battles." },
+  { opp:"Indiana Fever (C. Clark)", level:4, badge:"Breakout", color:"#F87171", note:"New but massive. Clark vs. Ionescu drives Gen Z crossover and mainstream media." },
+  { opp:"Seattle Storm",            level:3, badge:"Legacy",   color:"#FBBF24", note:"Stewart homecoming narrative. Strong storytelling angle for Spotify content." },
+  { opp:"Chicago Sky",              level:3, badge:"Market",   color:"#FBBF24", note:"Major-market rivalry. NY vs. Chicago cultural activation." },
+  { opp:"Connecticut Sun",          level:2, badge:"Regional", color:"#60A5FA", note:"Geographic rivalry. High local value for NY metro audience." },
+  { opp:"Dallas Wings",             level:2, badge:"Personal", color:"#60A5FA", note:"Sabally sisters storyline. International editorial angle." },
+];
+
+/* ════════════════════════════════════════════════════════
+   LEVEL CONFIG
+════════════════════════════════════════════════════════ */
+const LC = {
+  flagship: { label:"Flagship",  color:"#1DB954", bg:"rgba(29,185,84,.1)",   border:"rgba(29,185,84,.25)" },
+  high:     { label:"Plus up",   color:"#60A5FA", bg:"rgba(96,165,250,.1)",  border:"rgba(96,165,250,.25)" },
+  medium:   { label:"Activate",  color:"#A78BFA", bg:"rgba(167,139,250,.1)", border:"rgba(167,139,250,.25)" },
+  low:      { label:"Passive",   color:"#4B5563", bg:"rgba(75,85,99,.1)",    border:"rgba(75,85,99,.2)" },
+  conflict: { label:"Risk",      color:"#F87171", bg:"rgba(248,113,113,.1)", border:"rgba(248,113,113,.25)" },
+  hold:     { label:"Hold back", color:"#FBBF24", bg:"rgba(251,191,36,.1)",  border:"rgba(251,191,36,.25)" },
+  watch:    { label:"Monitor",   color:"#FB923C", bg:"rgba(251,146,60,.1)",  border:"rgba(251,146,60,.25)" },
+};
+const IC = {
+  high:   { color:"#F87171", bg:"rgba(248,113,113,.1)" },
+  medium: { color:"#FBBF24", bg:"rgba(251,191,36,.1)" },
+  low:    { color:"#4ADE80", bg:"rgba(74,222,128,.1)" },
+};
+const LIB_CAT_ICON = { injury:"🏥", roster:"👤", game:"🏀", rivalry:"⚔️", cultural:"🎵", media:"📺" };
+const WNBA_CAT = {
+  ratings:    { icon:"📊", label:"Ratings",    color:"#60A5FA" },
+  whitespace: { icon:"🎯", label:"White Space", color:"#1DB954" },
+  player:     { icon:"⭐", label:"Players",     color:"#FBBF24" },
+  influencer: { icon:"📣", label:"Influencers", color:"#A78BFA" },
+  media:      { icon:"📺", label:"Media",       color:"#FB923C" },
+};
+
+/* ════════════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════════════ */
+let apiKey = "";
+let pendingRefresh = null;
+let libertyData = [...STATIC_LIBERTY];
+let wnbaData     = [...STATIC_WNBA];
+let calUpdates   = [...STATIC_CAL_UPDATES];
+let activeQ      = "Q2";
+let wnbaFilter   = "all";
+let openCards    = new Set();
+
+/* ════════════════════════════════════════════════════════
+   RENDER HELPERS
+════════════════════════════════════════════════════════ */
+function badge(level) {
+  const c = LC[level] || LC.low;
+  return `<span class="badge" style="color:${c.color};background:${c.bg};border:1px solid ${c.border}">${c.label}</span>`;
+}
+
+function renderIntelList(items, container, libMode) {
+  if (!items.length) { container.innerHTML = '<div class="empty-state">No items</div>'; return; }
+  container.innerHTML = items.map(item => {
+    const ic   = IC[item.impact] || IC.low;
+    const icon = libMode
+      ? (LIB_CAT_ICON[item.category] || "📌")
+      : (WNBA_CAT[item.category]?.icon || "📌");
+    const catInfo = !libMode ? WNBA_CAT[item.category] : null;
+    const leftColor = catInfo ? catInfo.color : ic.color;
+    const catPill   = catInfo
+      ? `<span class="pill" style="color:${catInfo.color};background:${catInfo.color}18;border:1px solid ${catInfo.color}30">${catInfo.label}</span>`
+      : "";
+    return `
+      <div class="intel-card fade-up" style="border-left-color:${leftColor}">
+        <div class="intel-top">
+          <div class="intel-body">
+            <div class="intel-tags">
+              <span class="intel-icon">${icon}</span>
+              <span class="intel-headline">${item.headline}</span>
+              <span class="pill" style="color:${ic.color};background:${ic.bg};border:1px solid ${ic.color}33">${item.impact}</span>
+              ${catPill}
+            </div>
+            <div class="intel-detail">${item.detail}</div>
+            <div class="intel-action">
+              <span class="action-label">Spotify →</span>
+              <span class="action-text">${item.spotifyAction}</span>
+            </div>
+          </div>
+          <div class="intel-age">${item.daysAgo === 0 ? "today" : item.daysAgo + "d ago"}</div>
+        </div>
+      </div>`;
+  }).join("");
+}
+
+function renderCalUpdates() {
+  const list = document.getElementById("cal-updates-list");
+  list.innerHTML = calUpdates.map((u, i) => {
+    const tc = u.type === "confirmed" ? "#1DB954" : u.type === "shifted" ? "#FBBF24" : "#60A5FA";
+    return `<div class="update-row" style="margin-bottom:${i < calUpdates.length - 1 ? "7px" : "0"}">
+      <span class="update-type" style="color:${tc}">${u.type}</span>
+      <span class="update-text"><span class="update-camp">${u.campaignId}</span> — ${u.update}</span>
+    </div>`;
+  }).join("");
+}
+
+function renderCampaigns() {
+  const items = CAMPAIGNS.filter(c => c.q === activeQ);
+  const list  = document.getElementById("camp-list");
+  list.innerHTML = items.map(c => {
+    const lc   = LC[c.level] || LC.low;
+    const open = openCards.has(c.id);
+    const body = open ? `
+      <div class="camp-body fade-up">
+        ${c.angle  ? `<div class="angle-box"><div class="angle-label">Liberty activation angle</div><div class="angle-text">${c.angle}</div></div>` : ""}
+        ${c.conflict ? `<div class="warn-box"><div class="warn-label">⚠ Watch</div><div class="warn-text">${c.conflict}</div></div>` : ""}
+        ${!c.angle && !c.conflict ? `<div class="camp-none">No direct Liberty activation angle — passive monitoring.</div>` : ""}
+      </div>` : "";
+    return `
+      <div class="camp-card" style="--lc:${lc.color}" data-id="${c.id}">
+        <div class="camp-head">
+          <div>
+            <div class="camp-title-row">
+              <span class="camp-name">${c.name}</span>
+              ${badge(c.level)}
+              ${c.status === "tbc" ? `<span class="tbc-pill">TBC</span>` : ""}
+            </div>
+            <div class="camp-dates">${c.dates}</div>
+          </div>
+          <span class="camp-toggle">${open ? "−" : "+"}</span>
+        </div>
+        ${body}
+      </div>`;
+  }).join("");
+
+  list.querySelectorAll(".camp-card").forEach(el => {
+    el.addEventListener("click", () => {
+      const id = el.dataset.id;
+      openCards.has(id) ? openCards.delete(id) : openCards.add(id);
+      renderCampaigns();
+    });
+  });
+}
+
+function renderPairings() {
+  const levels = ["flagship","high","medium","conflict","hold"];
+  document.getElementById("pair-legend").innerHTML = levels.map(l => {
+    const c = LC[l];
+    return `<div class="legend-item"><div class="legend-dot" style="background:${c.color}"></div>${c.label}</div>`;
+  }).join("");
+
+  document.getElementById("pair-list").innerHTML = PAIRINGS.map(p => {
+    const lc   = LC[p.level] || LC.low;
+    const open = openCards.has("p_" + p.title);
+    const body = open ? `
+      <div class="pair-body fade-up">
+        <div class="pair-desc">${p.desc}</div>
+        <div class="pair-actions">
+          ${p.actions.map(a => `<div class="pair-action"><span class="pair-arrow" style="color:${lc.color}">→</span><span class="pair-act-text">${a}</span></div>`).join("")}
+        </div>
+      </div>` : "";
+    return `
+      <div class="pair-card" style="--lc:${lc.color}" data-id="${encodeURIComponent(p.title)}">
+        <div class="pair-head">
+          <div class="pair-title-row">
+            <span class="pair-name">${p.title}</span>
+            ${badge(p.level)}
+            <span class="pair-dates">${p.dates}</span>
+          </div>
+          <span class="camp-toggle">${open ? "−" : "+"}</span>
+        </div>
+        ${body}
+      </div>`;
+  }).join("");
+
+  document.getElementById("pair-list").querySelectorAll(".pair-card").forEach(el => {
+    el.addEventListener("click", () => {
+      const id = "p_" + decodeURIComponent(el.dataset.id);
+      openCards.has(id) ? openCards.delete(id) : openCards.add(id);
+      renderPairings();
+    });
+  });
+}
+
+function renderRoster() {
+  document.getElementById("player-list").innerHTML = ROSTER.map(p => `
+    <div class="player-card">
+      <div class="pos-badge ${p.status === "active" ? "pos-active" : "pos-monitor"}">${p.pos}</div>
+      <div>
+        <div class="player-tags">
+          <span class="player-name">${p.name}</span>
+          <span class="${p.status === "active" ? "status-active" : "status-monitor"}">${p.status === "active" ? "● Active" : "⚠ Monitor"}</span>
+          <span class="stars">${"★".repeat(p.stars)}</span>
+        </div>
+        <div class="player-note">${p.note}</div>
+      </div>
+    </div>`).join("");
+
+  document.getElementById("rivalry-list").innerHTML = RIVALRIES.map(r => `
+    <div class="rivalry-card" style="--rc:${r.color}">
+      <div class="riv-dots">
+        ${[1,2,3,4,5].map(n => `<div class="riv-dot ${n <= r.level ? "on" : "off"}"></div>`).join("")}
+      </div>
+      <div>
+        <div class="riv-tags">
+          <span class="riv-name">${r.opp}</span>
+          <span class="pill" style="color:${r.color};background:${r.color}18;border:1px solid ${r.color}30">${r.badge}</span>
+        </div>
+        <div class="riv-note">${r.note}</div>
+      </div>
+    </div>`).join("");
+}
+
+function renderAll() {
+  renderIntelList(libertyData, document.getElementById("lib-list"), true);
+  const filtered = wnbaFilter === "all" ? wnbaData : wnbaData.filter(i => i.category === wnbaFilter);
+  renderIntelList(filtered, document.getElementById("wnba-list"), false);
+  renderCalUpdates();
+  renderCampaigns();
+  renderPairings();
+  renderRoster();
+}
+
+/* ════════════════════════════════════════════════════════
+   TAB SWITCHING
+════════════════════════════════════════════════════════ */
+document.getElementById("tab-nav").addEventListener("click", e => {
+  const btn = e.target.closest(".tab-btn");
+  if (!btn) return;
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+});
+
+/* Quarter selector */
+document.querySelector(".q-row").addEventListener("click", e => {
+  const btn = e.target.closest(".q-btn");
+  if (!btn) return;
+  document.querySelectorAll(".q-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  activeQ = btn.dataset.q;
+  renderCampaigns();
+});
+
+/* WNBA filter */
+document.getElementById("wnba-filters").addEventListener("click", e => {
+  const btn = e.target.closest(".filter-btn");
+  if (!btn) return;
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  wnbaFilter = btn.dataset.cat;
+  const filtered = wnbaFilter === "all" ? wnbaData : wnbaData.filter(i => i.category === wnbaFilter);
+  renderIntelList(filtered, document.getElementById("wnba-list"), false);
+});
+
+/* ════════════════════════════════════════════════════════
+   API MODAL
+════════════════════════════════════════════════════════ */
+function openModal(type) {
+  pendingRefresh = type;
+  document.getElementById("modal-overlay").classList.add("open");
+  document.getElementById("api-key-input").value = "";
+  setTimeout(() => document.getElementById("api-key-input").focus(), 100);
+}
+function closeModal() {
+  document.getElementById("modal-overlay").classList.remove("open");
+}
+document.getElementById("modal-cancel").addEventListener("click", closeModal);
+document.getElementById("modal-overlay").addEventListener("click", e => {
+  if (e.target === document.getElementById("modal-overlay")) closeModal();
+});
+document.getElementById("api-key-input").addEventListener("keydown", e => {
+  if (e.key === "Enter") document.getElementById("modal-save").click();
+});
+document.getElementById("modal-save").addEventListener("click", () => {
+  const val = document.getElementById("api-key-input").value.trim();
+  if (!val) return;
+  apiKey = val;
+  document.getElementById("api-ok-badge").style.display = "inline-block";
+  closeModal();
+  if (pendingRefresh === "lib")  doRefreshLiberty();
+  if (pendingRefresh === "wnba") doRefreshWnba();
+  if (pendingRefresh === "cal")  doRefreshCal();
+  pendingRefresh = null;
+});
+
+/* ════════════════════════════════════════════════════════
+   REFRESH BUTTONS
+════════════════════════════════════════════════════════ */
+function setBtnLoading(btn, loading) {
+  btn.disabled = loading;
+  const icon = btn.querySelector(".refresh-icon");
+  icon.classList.toggle("spinning", loading);
+  btn.querySelector("span:last-child") && null; // just the icon spins
+  if (loading) {
+    btn.lastChild.textContent = " Loading…";
+  } else {
+    // restore original text
+    const labels = { "btn-refresh-lib":"Refresh Intel", "btn-refresh-wnba":"Refresh WNBA Intel", "btn-refresh-cal":"Refresh Calendar" };
+    btn.lastChild.textContent = " " + (labels[btn.id] || "Refresh");
+  }
+}
+
+document.getElementById("btn-refresh-lib").addEventListener("click",  () => apiKey ? doRefreshLiberty() : openModal("lib"));
+document.getElementById("btn-refresh-wnba").addEventListener("click", () => apiKey ? doRefreshWnba()    : openModal("wnba"));
+document.getElementById("btn-refresh-cal").addEventListener("click",  () => apiKey ? doRefreshCal()     : openModal("cal"));
+
+/* ════════════════════════════════════════════════════════
+   API CALLS
+════════════════════════════════════════════════════════ */
+async function callApi(system, user, maxTok) {
+  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: maxTok || 1400,
+      system,
+      messages: [{ role: "user", content: user }]
+    })
+  });
+  const data = await resp.json();
+  if (data.error) throw new Error(data.error.message);
+  const raw = data.content?.find(b => b.type === "text")?.text || "{}";
+  return JSON.parse(raw.replace(/```json[\s\S]*?```|```/g, "").trim());
+}
+
+async function doRefreshLiberty() {
+  const btn = document.getElementById("btn-refresh-lib");
+  setBtnLoading(btn, true);
+  try {
+    const today = new Date().toLocaleDateString("en-US", { month:"long", day:"numeric", year:"numeric" });
+    const r = await callApi(
+      "Sports intelligence analyst. Return ONLY valid JSON, no markdown, no extra text.",
+      `Today is ${today}. Generate current NY Liberty WNBA intelligence for a Spotify brand partnership team.
+Return: {"items":[{"id":"str","category":"injury|roster|game|rivalry|cultural|media","headline":"under 12 words","detail":"2-3 sentences with context and Spotify strategic implication","impact":"high|medium|low","spotifyAction":"specific Spotify action","daysAgo":0}]}
+Include 7-8 items covering: injury updates, recent game results, upcoming marquee matchups, cultural moments, media trends, rivalry notes. Vary impact levels. Realistic for May 2026 WNBA season.`,
+      1400
+    );
+    if (r.items?.length) { libertyData = r.items; renderIntelList(libertyData, document.getElementById("lib-list"), true); }
+  } catch(e) { alert("API error: " + e.message); }
+  setBtnLoading(btn, false);
+}
+
+async function doRefreshWnba() {
+  const btn = document.getElementById("btn-refresh-wnba");
+  setBtnLoading(btn, true);
+  try {
+    const today = new Date().toLocaleDateString("en-US", { month:"long", day:"numeric", year:"numeric" });
+    const r = await callApi(
+      "WNBA league intelligence analyst for a brand partnership team. Return ONLY valid JSON, no markdown.",
+      `Today is ${today}. Generate current WNBA league-wide intelligence for Spotify's partnership team (broader league trends, not Liberty-specific).
+Return: {"items":[{"id":"str","category":"ratings|whitespace|player|influencer|media","headline":"under 12 words","detail":"2-3 sentences with context and Spotify strategic implication","impact":"high|medium|low","spotifyAction":"specific Spotify action or opportunity","daysAgo":0}]}
+Include 7-8 items across: ratings & viewership trends, white space brand opportunities, notable non-Liberty player news (Clark, A'ja Wilson, Angel Reese), influencer/cultural voices, media landscape shifts. Realistic for May 2026 WNBA season.`,
+      1400
+    );
+    if (r.items?.length) {
+      wnbaData = r.items;
+      const filtered = wnbaFilter === "all" ? wnbaData : wnbaData.filter(i => i.category === wnbaFilter);
+      renderIntelList(filtered, document.getElementById("wnba-list"), false);
+    }
+  } catch(e) { alert("API error: " + e.message); }
+  setBtnLoading(btn, false);
+}
+
+async function doRefreshCal() {
+  const btn = document.getElementById("btn-refresh-cal");
+  setBtnLoading(btn, true);
+  try {
+    const today = new Date().toLocaleDateString("en-US", { month:"long", day:"numeric", year:"numeric" });
+    const r = await callApi(
+      "Marketing calendar analyst. Return ONLY valid JSON, no markdown.",
+      `Today is ${today}. Spotify 2026 calendar (Q2–Q4): Prompted Playlists (Apr 27–Jun 18), Fitness/Peloton (Apr 27–Jun 7), Music Creativity Launch (Jun 16), Fan Life 3.0 (Jul 8–Sep 30), Watching On Spotify (Sep 1–Oct 11), Project Horizon US (May 20–Aug 9), FCB El Clasico (Apr/May and Oct/Nov), 2026 Wrapped (Dec 2 TBC), Project Kallax (Aug–Sep TBC), MFT+ H2 TBC.
+Simulate a weekly calendar refresh — timing confirmations, TBC updates, new notes. Return: {"changes":[{"campaignId":"name","type":"confirmed|shifted|added|note","update":"brief description"}],"noChangeCount":12}
+Return 2-4 realistic small updates.`,
+      600
+    );
+    if (r.changes?.length) {
+      calUpdates = r.changes;
+      renderCalUpdates();
+      document.getElementById("cal-date").textContent = new Date().toLocaleDateString("en-US", { month:"short", day:"numeric", year:"numeric" });
+    }
+  } catch(e) { alert("API error: " + e.message); }
+  setBtnLoading(btn, false);
+}
+
+/* ════════════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════════════ */
+renderAll();
+</script>
+</body>
+</html>
